@@ -1,0 +1,53 @@
+import os
+import pandas as pd
+from progress.bar import Bar
+import time
+from tqdm import tqdm
+
+
+def read_excel(filename):
+    data = pd.read_excel(f"data/{filename}")
+
+    if not os.path.exists('out'):
+        os.makedirs('out')
+
+    for sorce_name, group in data.groupby('Source.Name'):
+        output_filename = f"out/{sorce_name}"
+        group[['phrase', 'tonality']].to_excel(output_filename, index=False)
+        # mylist = [1, 2, 3, 4, 5, 6, 7, 8]
+        #
+        # for i in tqdm(mylist):
+        #     time.sleep(1)
+
+    print('Данные сохранены в папку "out". ')
+
+
+def select_file():
+    files = [filename for filename in os.listdir('data') if not filename.startswith('~') and filename.endswith('.xlsx')]
+    if not files:
+        print("Ошибка: В папке 'data' нет доступных файлов формата .xlsx")
+        return None
+    for i, filename in enumerate(files, 1):
+        print(f"{i}. {filename}")
+
+    while True:
+        try:
+            choice = int(input("Выберите номер файла для обработки\n "))
+            if 1 <= choice <= len(files):
+                return files[choice - 1]
+            else:
+                print("Ошибка: Некорректный выбор файла")
+        except ValueError:
+            print("Ошибка: Введите целое число")
+        except IndexError:
+            print("Ошибка: Введите число из доступного диапазона")
+
+
+def main():
+    filename = select_file()
+    if filename:
+        read_excel(filename)
+
+
+if __name__ == "__main__":
+    main()
